@@ -31,6 +31,11 @@ const PaymentForm = ({
       return;
     }
 
+    if(!address || !email) {
+      alert("Please enter address and email");
+      return;
+    }
+
     try {
       await elements.submit();
 

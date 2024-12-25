@@ -151,9 +151,9 @@ export const getCheckout = async () => {
   }>("GET", `/user/checkout`);
 };
 
-export const logError = async (error: string) => {
+export const logError = async (data: string) => {
   return await request("POST", `/log/error`, {
-    error,
+    data,
   });
 };
 
