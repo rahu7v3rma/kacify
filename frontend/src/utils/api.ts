@@ -150,3 +150,21 @@ export const getCheckout = async () => {
     clientSecret: string;
   }>("GET", `/user/checkout`);
 };
+
+export const logError = async (error: string) => {
+  return await request("POST", `/log/error`, {
+    error,
+  });
+};
+
+export const postCheckout = async (
+  paymentIntentId: string,
+  address: string,
+  email: string
+) => {
+  return await request("POST", `/user/checkout`, {
+    paymentIntentId,
+    address,
+    email,
+  });
+};

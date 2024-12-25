@@ -83,3 +83,13 @@ export const AddUserRequestBodySchema = z.object({
 export const CheckoutPaymentIntentRequestBodySchema = z.object({
   amount: z.number().min(1),
 });
+
+export const LogErrorRequestBodySchema = z.object({
+  data: z.string().min(1),
+});
+
+export const CheckoutConfirmRequestBodySchema = z.object({
+  paymentIntentId: z.string().min(1),
+  address: z.string().min(1),
+  email: z.string().email(),
+});

@@ -1,5 +1,5 @@
 import { ErrorRequestHandler } from "express";
-import { sendErrorEmail } from "../utils/nodemailer";
+import { handleError } from "../utils/logger";
 
 export const errorHandler: ErrorRequestHandler = async (
   error,
@@ -11,6 +11,5 @@ export const errorHandler: ErrorRequestHandler = async (
     success: false,
     message: "internal server error",
   });
-  console.log(new Date().toISOString(), error);
-  sendErrorEmail(error.message);
+  handleError(error);
 };

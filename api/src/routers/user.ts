@@ -12,6 +12,7 @@ import {
   AddToCartRequestBodySchema,
   AddUserRequestBodySchema,
   ChangePasswordRequestBodySchema,
+  CheckoutConfirmRequestBodySchema,
   ForgotPasswordRequestBodySchema,
   LoginRequestBodySchema,
   RegisterRequestBodySchema,
@@ -396,6 +397,48 @@ UserRouter.get(
           clientSecret: paymentIntent.client_secret,
         },
       });
+      return;
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+UserRouter.post(
+  "/checkout",
+  authHandler,
+  roleHandler(["user"]),
+  requestBodyValidationHandler(CheckoutConfirmRequestBodySchema),
+  async (req, res, next) => {
+    try {
+      const { paymentIntentId, address, email } = req.body as z.infer<
+        typeof CheckoutConfirmRequestBodySchema
+      >;
+
+      const paymentIntent = await stripe.paymentIntents.retrieve(
+        paymentIntentId
+      );
+
+      if (paymentIntent.status !== "succeeded") {
+        res.json({
+          success: false,
+          message: "Payment failed",
+        });
+        return;
+      }
+
+      req.user.cart = [];
+      req.user.orders.push({
+        products: req.user.cart,
+        address,
+        email,
+      });
+      await req.user.save();
+
+      res.json({
+        success: true,
+      });
+
       return;
     } catch (error) {
       next(error);
