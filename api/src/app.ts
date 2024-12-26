@@ -8,6 +8,7 @@ import { notFoundHandler } from "./middlewares/general";
 import ProductRouter from "./routers/product";
 import UserRouter from "./routers/user";
 import LogRouter from "./routers/log";
+import { responseSerializeHandler } from "./middlewares/serializer";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use("/product", ProductRouter);
 app.use("/user", UserRouter);
 app.use("/log", LogRouter);
+app.use(responseSerializeHandler);
 app.use(notFoundHandler);
 app.use(errorHandler);
 

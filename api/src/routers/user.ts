@@ -18,6 +18,8 @@ import {
   RegisterRequestBodySchema,
 } from "../utils/zod";
 import dotenv from "dotenv";
+import { responseSerializeHandler } from "../middlewares/serializer";
+import { UserCheckoutResponseDataSchema } from "../utils/serializers";
 
 dotenv.config({});
 
@@ -385,19 +387,22 @@ UserRouter.get(
         0
       );
 
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: totalAmount * 100,
-        currency: process.env.STRIPE_CURRENCY!,
-      });
+      let clientSecret = "";
+      if (totalAmount) {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: totalAmount * 100,
+          currency: process.env.STRIPE_CURRENCY!,
+        });
+        if (paymentIntent.client_secret) {
+          clientSecret = paymentIntent.client_secret;
+        }
+      }
 
-      res.json({
-        success: true,
-        data: {
-          cart: req.user.cart,
-          clientSecret: paymentIntent.client_secret,
-        },
+      res.data = UserCheckoutResponseDataSchema.parse({
+        cart: req.user.cart,
+        clientSecret,
       });
-      return;
+      next();
     } catch (error) {
       next(error);
     }

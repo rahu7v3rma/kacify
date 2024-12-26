@@ -5,6 +5,11 @@ declare global {
     interface Request {
       user: UserType;
     }
+    interface Response {
+      success: boolean;
+      message: string;
+      data: any;
+    }
   }
 }
 
