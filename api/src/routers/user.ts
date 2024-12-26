@@ -1,12 +1,15 @@
+import dotenv from "dotenv";
 import { Router } from "express";
 import Stripe from "stripe";
 import { z } from "zod";
 import { authHandler, roleHandler } from "../middlewares/auth";
+import { responseSerializeHandler } from "../middlewares/serializer";
 import { requestBodyValidationHandler } from "../middlewares/validation";
 import UserModel from "../models/user";
 import { comparePassword, hashPassword } from "../utils/bcrypt";
 import { encodeJwt } from "../utils/jwt";
 import { sendForgotPasswordEmail } from "../utils/nodemailer";
+import { UserCheckoutResponseDataSchema } from "../utils/serializers";
 import { ProductType, UserType } from "../utils/types";
 import {
   AddToCartRequestBodySchema,
@@ -17,9 +20,6 @@ import {
   LoginRequestBodySchema,
   RegisterRequestBodySchema,
 } from "../utils/zod";
-import dotenv from "dotenv";
-import { responseSerializeHandler } from "../middlewares/serializer";
-import { UserCheckoutResponseDataSchema } from "../utils/serializers";
 
 dotenv.config({});
 
@@ -398,15 +398,16 @@ UserRouter.get(
         }
       }
 
-      res.data = UserCheckoutResponseDataSchema.parse({
+      res.data = {
         cart: req.user.cart,
         clientSecret,
-      });
+      };
       next();
     } catch (error) {
       next(error);
     }
-  }
+  },
+  responseSerializeHandler(UserCheckoutResponseDataSchema)
 );
 
 UserRouter.post(

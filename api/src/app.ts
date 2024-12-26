@@ -21,7 +21,6 @@ app.use(express.json({ limit: "10mb" }));
 app.use("/product", ProductRouter);
 app.use("/user", UserRouter);
 app.use("/log", LogRouter);
-app.use(responseSerializeHandler);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
