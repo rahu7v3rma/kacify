@@ -1,3 +1,4 @@
+import { ZodSchema } from "zod";
 import { UserType } from "./types";
 
 declare global {
@@ -9,6 +10,7 @@ declare global {
       success: boolean;
       message: string;
       data: any;
+      schema: ZodSchema
     }
   }
 }

@@ -398,16 +398,16 @@ UserRouter.get(
         }
       }
 
-      res.data = {
+      res.data = UserCheckoutResponseDataSchema.parse({
         cart: req.user.cart,
         clientSecret,
-      };
+      });
+
       next();
     } catch (error) {
       next(error);
     }
-  },
-  responseSerializeHandler(UserCheckoutResponseDataSchema)
+  }
 );
 
 UserRouter.post(
@@ -433,12 +433,12 @@ UserRouter.post(
         return;
       }
 
-      req.user.cart = [];
       req.user.orders.push({
         products: req.user.cart,
         address,
         email,
       });
+      req.user.cart = [];
       await req.user.save();
 
       res.json({

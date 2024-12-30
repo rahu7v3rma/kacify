@@ -1,4 +1,10 @@
-import { ErrorRequestHandler } from "express";
+import {
+  ErrorRequestHandler,
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+} from "express";
 import { handleError } from "../utils/logger";
 
 export const errorHandler: ErrorRequestHandler = async (
@@ -12,4 +18,10 @@ export const errorHandler: ErrorRequestHandler = async (
     message: "internal server error",
   });
   handleError(error);
+};
+
+export const errorCatcher = (fn: RequestHandler): RequestHandler => {
+  return (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
 };

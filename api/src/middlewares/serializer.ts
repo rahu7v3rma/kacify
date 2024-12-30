@@ -20,3 +20,16 @@ export const responseSerializeHandler =
       next(error);
     }
   };
+
+export const responseSerializer: RequestHandler = (req, res, next) => {
+  try {
+    res.json({
+      success: res?.success ?? true,
+      message: res?.message ?? "Success",
+      data: res.data ?? {},
+    });
+    return;
+  } catch (error) {
+    next(error);
+  }
+};
