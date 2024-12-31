@@ -20,6 +20,7 @@ import {
   LoginRequestBodySchema,
   RegisterRequestBodySchema,
 } from "../utils/zod";
+import CartModel from "../models/cart";
 
 dotenv.config({});
 
@@ -114,7 +115,7 @@ UserRouter.post(
       >;
 
       const user = await UserModel.findOne({ email });
-      if (!user || user.role !== "user") {
+      if (!user) {
         res.send({
           success: false,
           message: "unauthorized",
@@ -149,11 +150,7 @@ UserRouter.post(
 
       const [email, forgotPasswordToken] = token.split("|");
       const user = await UserModel.findOne({ email });
-      if (
-        !user ||
-        user.forgotPasswordToken !== parseInt(forgotPasswordToken) ||
-        user.role !== "user"
-      ) {
+      if (!user || user.forgotPasswordToken !== parseInt(forgotPasswordToken)) {
         res.send({
           success: false,
           message: "unauthorized",
@@ -232,12 +229,14 @@ UserRouter.post(
       >;
       const user = req.user as UserType;
 
+      const cart = CartModel.create({
+        products: [productId],
+        quantity,
+      });
+
       await user.updateOne({
         $push: {
-          cart: {
-            product: productId,
-            quantity,
-          },
+          cart: cart,
         },
       });
 
@@ -306,7 +305,8 @@ UserRouter.get(
   roleHandler(["user"]),
   async (req, res, next) => {
     try {
-      req.user = await req.user.populate("cart.product");
+      console.log(await req.user.populate("cart"));
+      console.log(req.user.cart);
       res.send({
         success: true,
         data: req.user.cart,
@@ -381,27 +381,27 @@ UserRouter.get(
     try {
       req.user = await req.user.populate("cart.product");
 
-      const totalAmount = req.user.cart.reduce(
-        (acc, cartItem) =>
-          acc + (cartItem.product as ProductType).price * cartItem.quantity,
-        0
-      );
+      // const totalAmount = req.user.cart.reduce(
+      //   (acc, cartItem) =>
+      //     acc + (cartItem.product as ProductType).price * cartItem.quantity,
+      //   0
+      // );
 
-      let clientSecret = "";
-      if (totalAmount) {
-        const paymentIntent = await stripe.paymentIntents.create({
-          amount: totalAmount * 100,
-          currency: process.env.STRIPE_CURRENCY!,
-        });
-        if (paymentIntent.client_secret) {
-          clientSecret = paymentIntent.client_secret;
-        }
-      }
+      // let clientSecret = "";
+      // if (totalAmount) {
+      //   const paymentIntent = await stripe.paymentIntents.create({
+      //     amount: totalAmount * 100,
+      //     currency: process.env.STRIPE_CURRENCY!,
+      //   });
+      //   if (paymentIntent.client_secret) {
+      //     clientSecret = paymentIntent.client_secret;
+      //   }
+      // }
 
-      res.data = UserCheckoutResponseDataSchema.parse({
-        cart: req.user.cart,
-        clientSecret,
-      });
+      // res.data = UserCheckoutResponseDataSchema.parse({
+      //   cart: req.user.cart,
+      //   clientSecret,
+      // });
 
       next();
     } catch (error) {
@@ -417,33 +417,33 @@ UserRouter.post(
   requestBodyValidationHandler(CheckoutConfirmRequestBodySchema),
   async (req, res, next) => {
     try {
-      const { paymentIntentId, address, email } = req.body as z.infer<
-        typeof CheckoutConfirmRequestBodySchema
-      >;
+      // const { paymentIntentId, address, email } = req.body as z.infer<
+      //   typeof CheckoutConfirmRequestBodySchema
+      // >;
 
-      const paymentIntent = await stripe.paymentIntents.retrieve(
-        paymentIntentId
-      );
+      // const paymentIntent = await stripe.paymentIntents.retrieve(
+      //   paymentIntentId
+      // );
 
-      if (paymentIntent.status !== "succeeded") {
-        res.json({
-          success: false,
-          message: "Payment failed",
-        });
-        return;
-      }
+      // if (paymentIntent.status !== "succeeded") {
+      //   res.json({
+      //     success: false,
+      //     message: "Payment failed",
+      //   });
+      //   return;
+      // }
 
-      req.user.orders.push({
-        products: req.user.cart,
-        address,
-        email,
-      });
-      req.user.cart = [];
-      await req.user.save();
+      // req.user.orders.push({
+      //   products: req.user.cart,
+      //   address,
+      //   email,
+      // });
+      // req.user.cart = [];
+      // await req.user.save();
 
-      res.json({
-        success: true,
-      });
+      // res.json({
+      //   success: true,
+      // });
 
       return;
     } catch (error) {

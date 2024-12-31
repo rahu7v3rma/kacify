@@ -1,5 +1,7 @@
 import { Schema, model } from "mongoose";
 import { UserType } from "../utils/types";
+import { CartModelName } from "./cart";
+import { OrderModelName } from "./order";
 
 const schema = new Schema<UserType>({
   email: {
@@ -27,33 +29,13 @@ const schema = new Schema<UserType>({
     default: [],
   },
   cart: {
-    type: [
-      {
-        product: {
-          type: Schema.Types.ObjectId,
-          ref: "Product",
-        },
-        quantity: Number,
-      },
-    ],
+    type: [Schema.Types.ObjectId],
+    ref: CartModelName,
     default: [],
   },
   orders: {
-    type: [
-      {
-        products: [
-          {
-            product: {
-              type: Schema.Types.ObjectId,
-              ref: "Product",
-            },
-            quantity: Number,
-          },
-        ],
-        address: String,
-        email: String,
-      },
-    ],
+    type: [Schema.Types.ObjectId],
+    ref: OrderModelName,
     default: [],
   },
 });

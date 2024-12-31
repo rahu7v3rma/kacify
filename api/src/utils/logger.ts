@@ -1,6 +1,6 @@
 import { sendErrorEmail } from "./nodemailer";
 
-export const handleError = (message: string) => {
-  console.error(new Date().toISOString(), message);
-  sendErrorEmail(message);
+export const handleError = (error: any) => {
+  console.error(new Date().toISOString(), JSON.stringify(error));
+  sendErrorEmail(JSON.stringify(error));
 };

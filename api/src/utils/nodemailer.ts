@@ -18,8 +18,8 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
   });
 };
 
-export const sendErrorEmail = async (message: string) => {
-  await sendEmail(process.env.EMAIL_ADDRESS!, "Kacify API error", message);
+export const sendErrorEmail = async (error: string) => {
+  await sendEmail(process.env.EMAIL_ADDRESS!, "Kacify API error", error);
 };
 
 export const sendForgotPasswordEmail = async (to: string, token: number) => {

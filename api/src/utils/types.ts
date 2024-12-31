@@ -16,13 +16,17 @@ export interface UserType extends Document {
   forgotPasswordToken: number | null;
   role: "user" | "admin" | "vendor";
   permissions: string[];
-  cart: { product: Types.ObjectId | ProductType | string; quantity: number }[];
-  orders: {
-    products: {
-      product: Types.ObjectId | ProductType | string;
-      quantity: number;
-    }[];
-    address: string;
-    email: string;
-  }[];
+  cart: Types.ObjectId | CartType[] | string;
+  orders: Types.ObjectId | OrderType[] | string;
+}
+
+export interface CartType extends Document {
+  products: Types.ObjectId | ProductType[] | string;
+  quantity: number;
+}
+
+export interface OrderType extends Document {
+  cart: CartType[] | Types.ObjectId | string;
+  address: string;
+  email: string;
 }

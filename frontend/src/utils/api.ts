@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getAuthToken } from "./localStorage";
-import { ProductType, UserType } from "../../../api/src/utils/types";
+import { CartType, ProductType, UserType } from "../../../api/src/utils/types";
 
 const request = async <DataType>(
   method: "GET" | "POST" | "PUT" | "DELETE",
@@ -121,7 +121,7 @@ export const addToCart = async (productId: string, quantity: number) => {
 };
 
 export const fetchCart = async () => {
-  return await request<UserType["cart"]>("GET", `/user/cart`);
+  return await request<CartType[]>("GET", `/user/cart`);
 };
 
 export const addUser = async (
@@ -146,7 +146,7 @@ export const editCartProduct = async (productId: string, quantity: number) => {
 
 export const getCheckout = async () => {
   return await request<{
-    cart: UserType["cart"];
+    cart: CartType[];
     clientSecret: string;
   }>("GET", `/user/checkout`);
 };
