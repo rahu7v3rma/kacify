@@ -5,12 +5,11 @@ import mongoose from "mongoose";
 import morgan from "morgan";
 import { errorHandler } from "./middlewares/error";
 import { notFoundHandler } from "./middlewares/general";
-import {
-  responseSerializer
-} from "./middlewares/serializer";
+import { responseSerializer } from "./middlewares/serializer";
 import LogRouter from "./routers/log";
 import ProductRouter from "./routers/product";
 import UserRouter from "./routers/user";
+import CartRouter from "./routers/cart";
 
 dotenv.config();
 
@@ -23,6 +22,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use("/product", ProductRouter);
 app.use("/user", UserRouter);
 app.use("/log", LogRouter);
+app.use("/cart", CartRouter);
 app.use(responseSerializer);
 app.use(notFoundHandler);
 app.use(errorHandler);

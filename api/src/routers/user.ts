@@ -3,24 +3,19 @@ import { Router } from "express";
 import Stripe from "stripe";
 import { z } from "zod";
 import { authHandler, roleHandler } from "../middlewares/auth";
-import { responseSerializeHandler } from "../middlewares/serializer";
 import { requestBodyValidationHandler } from "../middlewares/validation";
 import UserModel from "../models/user";
 import { comparePassword, hashPassword } from "../utils/bcrypt";
 import { encodeJwt } from "../utils/jwt";
 import { sendForgotPasswordEmail } from "../utils/nodemailer";
-import { UserCheckoutResponseDataSchema } from "../utils/serializers";
-import { ProductType, UserType } from "../utils/types";
 import {
-  AddToCartRequestBodySchema,
   AddUserRequestBodySchema,
   ChangePasswordRequestBodySchema,
   CheckoutConfirmRequestBodySchema,
   ForgotPasswordRequestBodySchema,
   LoginRequestBodySchema,
-  RegisterRequestBodySchema,
+  RegisterRequestBodySchema
 } from "../utils/zod";
-import CartModel from "../models/cart";
 
 dotenv.config({});
 
@@ -217,40 +212,6 @@ UserRouter.delete(
   }
 );
 
-UserRouter.post(
-  "/cart",
-  authHandler,
-  roleHandler(["user"]),
-  requestBodyValidationHandler(AddToCartRequestBodySchema),
-  async (req, res, next) => {
-    try {
-      const { productId, quantity } = req.body as z.infer<
-        typeof AddToCartRequestBodySchema
-      >;
-      const user = req.user as UserType;
-
-      const cart = CartModel.create({
-        products: [productId],
-        quantity,
-      });
-
-      await user.updateOne({
-        $push: {
-          cart: cart,
-        },
-      });
-
-      res.send({
-        success: true,
-        message: "Product added to cart",
-      });
-      return;
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
 UserRouter.get(
   "/all",
   authHandler,
@@ -292,80 +253,6 @@ UserRouter.post(
         message: "User added successfully",
       });
 
-      return;
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
-UserRouter.get(
-  "/cart",
-  authHandler,
-  roleHandler(["user"]),
-  async (req, res, next) => {
-    try {
-      console.log(await req.user.populate("cart"));
-      console.log(req.user.cart);
-      res.send({
-        success: true,
-        data: req.user.cart,
-      });
-      return;
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
-UserRouter.put(
-  "/cart/:productId/:quantity",
-  authHandler,
-  roleHandler(["user"]),
-  async (req, res, next) => {
-    try {
-      const productId = req.params.productId;
-      const quantity = parseInt(req.params.quantity);
-      await UserModel.findOneAndUpdate(
-        {
-          _id: req.user._id,
-          "cart.product": productId,
-        },
-        {
-          $set: {
-            "cart.$.quantity": quantity,
-          },
-        }
-      );
-      res.json({
-        success: true,
-        message: "Cart updated",
-      });
-      return;
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
-UserRouter.delete(
-  "/cart/:productId",
-  authHandler,
-  roleHandler(["user"]),
-  async (req, res, next) => {
-    try {
-      const productId = req.params.productId;
-      await req.user.updateOne({
-        $pull: {
-          cart: {
-            product: productId,
-          },
-        },
-      });
-      res.json({
-        success: true,
-        message: "Product removed from cart",
-      });
       return;
     } catch (error) {
       next(error);

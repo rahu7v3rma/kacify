@@ -20,9 +20,14 @@ export interface UserType extends Document {
   orders: Types.ObjectId | OrderType[] | string;
 }
 
-export interface CartType extends Document {
-  products: Types.ObjectId | ProductType[] | string;
+export interface CartProductType extends Document {
+  product: Types.ObjectId | ProductType | string;
   quantity: number;
+}
+
+export interface CartType extends Document {
+  user: Types.ObjectId | UserType | string;
+  products: Types.ObjectId | CartProductType[] | string;
 }
 
 export interface OrderType extends Document {

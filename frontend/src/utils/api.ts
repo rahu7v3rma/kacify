@@ -114,7 +114,7 @@ export const editProduct = async (
 };
 
 export const addToCart = async (productId: string, quantity: number) => {
-  return await request("POST", `/user/cart`, {
+  return await request("POST", `/cart`, {
     productId,
     quantity,
   });
