@@ -1,16 +1,14 @@
 import axios from "axios";
 import { getAuthToken } from "./localStorage";
-import { CartType, ProductType, UserType } from "../../../api/src/utils/types";
+import { ProductType, UserType } from "../../../api/src/utils/types";
+import { ApiResponseType, CartProductType } from "./types";
+import { alertApiRespone } from "./alert";
 
 const request = async <DataType>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   url: string,
   data: any = {}
-): Promise<{
-  success: boolean;
-  data: DataType;
-  message: string;
-}> => {
+): Promise<ApiResponseType<DataType>> => {
   const response = await axios.request({
     method,
     baseURL: process.env.REACT_APP_API_BASE_URL,
@@ -120,9 +118,9 @@ export const addToCart = async (productId: string, quantity: number) => {
   });
 };
 
-export const fetchCart = async () => {
-  return await request<CartType[]>("GET", `/user/cart`);
-};
+export const fetchCartProducts = alertApiRespone(async () => {
+  return await request<CartProductType[]>("GET", `/cart/products`);
+});
 
 export const addUser = async (
   email: string,
@@ -137,16 +135,16 @@ export const addUser = async (
 };
 
 export const removeFromCart = async (productId: string) => {
-  return await request("DELETE", `/user/cart/${productId}`);
+  return await request("DELETE", `/cart/${productId}`);
 };
 
 export const editCartProduct = async (productId: string, quantity: number) => {
-  return await request("PUT", `/user/cart/${productId}/${quantity}`);
+  return await request("PUT", `/cart/${productId}/${quantity}`);
 };
 
 export const getCheckout = async () => {
   return await request<{
-    cart: CartType[];
+    cart: CartProductType[];
     clientSecret: string;
   }>("GET", `/user/checkout`);
 };

@@ -1,35 +1,29 @@
 import { useEffect, useState } from "react";
-import { editCartProduct, fetchCart, removeFromCart } from "../utils/api";
-import { ProductType } from "../../../api/src/utils/types";
+import {
+  editCartProduct,
+  fetchCartProducts,
+  removeFromCart,
+} from "../utils/api";
+import { CartProductType } from "../utils/types";
 
 const Cart = () => {
-  const [cart, setCart] = useState<
-    {
-      product: ProductType;
-      quantity: number;
-    }[]
-  >([]);
+  const [cartProducts, setCartProducts] = useState<CartProductType[]>([]);
   const loadCart = () => {
-    fetchCart().then((response) => {
-      if (response.success) {
-        setCart(
-          response.data.map((x) => ({
-            product: x.product as ProductType,
-            quantity: x.quantity,
-          }))
-        );
-      } else {
-        alert(response.message);
-      }
+    fetchCartProducts().then((response) => {
+      console.log({ response });
+      setCartProducts(response);
     });
   };
   useEffect(() => {
     loadCart();
   }, []);
+  useEffect(() => {
+    console.log({ cartProducts });
+  }, [cartProducts]);
   return (
     <div className="p-4">
       Cart
-      {cart?.map((cartItem, index) => (
+      {cartProducts?.map((cartItem, index) => (
         <div key={index} className="border w-max p-2 mt-2 flex gap-2">
           <span>{cartItem.product.name}</span>
           {cartItem.quantity > 1 && (

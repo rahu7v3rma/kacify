@@ -21,6 +21,7 @@ export interface UserType extends Document {
 }
 
 export interface CartProductType extends Document {
+  user: Types.ObjectId | UserType | string;
   product: Types.ObjectId | ProductType | string;
   quantity: number;
 }

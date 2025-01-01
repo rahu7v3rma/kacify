@@ -11,6 +11,7 @@ declare global {
       message: string;
       data: any;
       schema: ZodSchema
+      defaultData: any
     }
   }
 }

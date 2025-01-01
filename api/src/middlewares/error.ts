@@ -16,6 +16,7 @@ export const errorHandler: ErrorRequestHandler = async (
   res.json({
     success: false,
     message: "internal server error",
+    data: res.data ?? res.defaultData ?? {},
   });
   handleError(error);
 };

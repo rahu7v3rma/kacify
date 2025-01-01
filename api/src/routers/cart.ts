@@ -1,13 +1,19 @@
 import { Router } from "express";
-import { authHandler, roleHandler } from "../middlewares/auth";
-import { requestBodyValidationHandler } from "../middlewares/validation";
-import { AddToCartRequestBodySchema } from "../utils/zod";
-import UserModel from "../models/user";
-import { UserType } from "../utils/types";
 import { z } from "zod";
-import CartModel, { CartProductModel } from "../models/cart";
-import { handleTransaction } from "../utils/mongoose";
+import { authHandler, roleHandler } from "../middlewares/auth";
+import {
+  requestBodyValidationHandler,
+  requestParamsValidationHandler,
+} from "../middlewares/validation";
+import { CartProductModel } from "../models/cart";
 import ProductModel from "../models/product";
+import { CartGetResponseDataSchema } from "../utils/serializers";
+import { UserType } from "../utils/types";
+import {
+  AddToCartRequestBodySchema,
+  DeleteCartProductRequestParamSchema,
+  UpdateCartRequestParamSchema,
+} from "../utils/zod";
 
 const CartRouter = Router();
 
@@ -32,18 +38,10 @@ CartRouter.post(
         return;
       }
 
-      await handleTransaction(async (session) => {
-        const cartProduct = new CartProductModel({
-          product: product._id,
-          quantity,
-        });
-        await cartProduct.save({ session });
-
-        const cart = new CartModel({
-          user: user._id,
-          products: [cartProduct._id],
-        });
-        await cart.save({ session });
+      await CartProductModel.create({
+        user: user._id,
+        product: product._id,
+        quantity,
       });
 
       next();
@@ -54,18 +52,20 @@ CartRouter.post(
 );
 
 CartRouter.get(
-  "/",
+  "/products",
   authHandler,
   roleHandler(["user"]),
   async (req, res, next) => {
     try {
-      console.log(await req.user.populate("cart"));
-      console.log(req.user.cart);
-      res.send({
-        success: true,
-        data: req.user.cart,
-      });
-      return;
+      res.defaultData = [];
+
+      const cartProducts = await CartProductModel.find({
+        user: req.user._id,
+      }).populate("product");
+
+      res.data = CartGetResponseDataSchema.parse(cartProducts);
+
+      next();
     } catch (error) {
       next(error);
     }
@@ -73,29 +73,37 @@ CartRouter.get(
 );
 
 CartRouter.put(
-  "/:cartId/:quantity",
+  "/:productId/:quantity",
   authHandler,
   roleHandler(["user"]),
+  requestParamsValidationHandler(UpdateCartRequestParamSchema),
   async (req, res, next) => {
     try {
-      const productId = req.params.productId;
-      const quantity = parseInt(req.params.quantity);
-      await UserModel.findOneAndUpdate(
+      const { productId, quantity } = req.params as unknown as z.infer<
+        typeof UpdateCartRequestParamSchema
+      >;
+
+      const product = await ProductModel.findById(productId);
+      if (!product) {
+        res.success = false;
+        res.message = "Product not found";
+        next();
+        return;
+      }
+
+      console.log(req.user._id, product._id);
+
+      await CartProductModel.findOneAndUpdate(
         {
-          _id: req.user._id,
-          "cart.product": productId,
+          user: req.user._id,
+          product: product._id,
         },
         {
-          $set: {
-            "cart.$.quantity": quantity,
-          },
+          quantity,
         }
       );
-      res.json({
-        success: true,
-        message: "Cart updated",
-      });
-      return;
+
+      next();
     } catch (error) {
       next(error);
     }
@@ -103,24 +111,36 @@ CartRouter.put(
 );
 
 CartRouter.delete(
-  "/:cartId",
+  "/:productId",
   authHandler,
   roleHandler(["user"]),
+  requestParamsValidationHandler(DeleteCartProductRequestParamSchema),
   async (req, res, next) => {
     try {
-      const productId = req.params.productId;
-      await req.user.updateOne({
-        $pull: {
-          cart: {
-            product: productId,
-          },
-        },
+      const { productId } = req.params as unknown as z.infer<
+        typeof DeleteCartProductRequestParamSchema
+      >;
+
+      const product = await ProductModel.findById(productId);
+      if (!product) {
+        res.success = false;
+        res.message = "Product not found";
+        next();
+        return;
+      }
+
+      const cartProduct = await CartProductModel.findOne({
+        user: req.user._id,
+        product: product._id,
       });
-      res.json({
-        success: true,
-        message: "Product removed from cart",
-      });
-      return;
+
+      if (!cartProduct) {
+        res.success = false;
+      } else {
+        await cartProduct.deleteOne();
+      }
+
+      next();
     } catch (error) {
       next(error);
     }

@@ -1,5 +1,6 @@
 import { isStrongPassword } from "validator";
 import { z } from "zod";
+import { CartProductModel } from "../models/cart";
 
 export const RegisterRequestBodySchema = z.object({
   email: z.string().email(),
@@ -92,4 +93,20 @@ export const CheckoutConfirmRequestBodySchema = z.object({
   paymentIntentId: z.string().min(1),
   address: z.string().min(1),
   email: z.string().email(),
+});
+
+export const UpdateCartRequestParamSchema = z.object({
+  productId: z.string().min(1),
+  quantity: z
+    .string()
+    .min(1)
+    .refine((val) => {
+      const valNumber = parseInt(val);
+      return !isNaN(valNumber) && valNumber >= 1;
+    })
+    .transform((val) => parseInt(val)),
+});
+
+export const DeleteCartProductRequestParamSchema = z.object({
+  productId: z.string().min(1),
 });
