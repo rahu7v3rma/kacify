@@ -11,10 +11,9 @@ import { sendForgotPasswordEmail } from "../utils/nodemailer";
 import {
   AddUserRequestBodySchema,
   ChangePasswordRequestBodySchema,
-  CheckoutConfirmRequestBodySchema,
   ForgotPasswordRequestBodySchema,
   LoginRequestBodySchema,
-  RegisterRequestBodySchema
+  RegisterRequestBodySchema,
 } from "../utils/zod";
 
 dotenv.config({});
@@ -252,85 +251,6 @@ UserRouter.post(
         success: true,
         message: "User added successfully",
       });
-
-      return;
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
-UserRouter.get(
-  "/checkout",
-  authHandler,
-  roleHandler(["user"]),
-  async (req, res, next) => {
-    try {
-      req.user = await req.user.populate("cart.product");
-
-      // const totalAmount = req.user.cart.reduce(
-      //   (acc, cartItem) =>
-      //     acc + (cartItem.product as ProductType).price * cartItem.quantity,
-      //   0
-      // );
-
-      // let clientSecret = "";
-      // if (totalAmount) {
-      //   const paymentIntent = await stripe.paymentIntents.create({
-      //     amount: totalAmount * 100,
-      //     currency: process.env.STRIPE_CURRENCY!,
-      //   });
-      //   if (paymentIntent.client_secret) {
-      //     clientSecret = paymentIntent.client_secret;
-      //   }
-      // }
-
-      // res.data = UserCheckoutResponseDataSchema.parse({
-      //   cart: req.user.cart,
-      //   clientSecret,
-      // });
-
-      next();
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
-UserRouter.post(
-  "/checkout",
-  authHandler,
-  roleHandler(["user"]),
-  requestBodyValidationHandler(CheckoutConfirmRequestBodySchema),
-  async (req, res, next) => {
-    try {
-      // const { paymentIntentId, address, email } = req.body as z.infer<
-      //   typeof CheckoutConfirmRequestBodySchema
-      // >;
-
-      // const paymentIntent = await stripe.paymentIntents.retrieve(
-      //   paymentIntentId
-      // );
-
-      // if (paymentIntent.status !== "succeeded") {
-      //   res.json({
-      //     success: false,
-      //     message: "Payment failed",
-      //   });
-      //   return;
-      // }
-
-      // req.user.orders.push({
-      //   products: req.user.cart,
-      //   address,
-      //   email,
-      // });
-      // req.user.cart = [];
-      // await req.user.save();
-
-      // res.json({
-      //   success: true,
-      // });
 
       return;
     } catch (error) {

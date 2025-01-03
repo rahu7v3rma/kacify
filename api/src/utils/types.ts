@@ -32,6 +32,7 @@ export interface CartType extends Document {
 }
 
 export interface OrderType extends Document {
+  user: Types.ObjectId | UserType | string;
   cart: CartType[] | Types.ObjectId | string;
   address: string;
   email: string;

@@ -10,6 +10,7 @@ import LogRouter from "./routers/log";
 import ProductRouter from "./routers/product";
 import UserRouter from "./routers/user";
 import CartRouter from "./routers/cart";
+import OrderRouter from "./routers/order";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use("/product", ProductRouter);
 app.use("/user", UserRouter);
 app.use("/log", LogRouter);
 app.use("/cart", CartRouter);
+app.use("/order", OrderRouter);
 app.use(responseSerializer);
 app.use(notFoundHandler);
 app.use(errorHandler);

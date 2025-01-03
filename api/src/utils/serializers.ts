@@ -1,9 +1,15 @@
-import { z } from "zod";
-import { UserType } from "./types";
 import { Types } from "mongoose";
+import { z } from "zod";
 
-export const UserCheckoutResponseDataSchema = z.object({
-  cart: z.custom<UserType["cart"]>(),
+export const GetOrderResponseDataSchema = z.object({
+  cart: z.object({
+    product: z.object({
+      _id: z.custom<Types.ObjectId>(),
+      name: z.string(),
+      price: z.number(),
+    }),
+    quantity: z.number(),
+  }),
   clientSecret: z.string(),
 });
 

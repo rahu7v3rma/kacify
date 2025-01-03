@@ -1,8 +1,14 @@
 import { Schema, model } from "mongoose";
-import { CartType, OrderType } from "../utils/types";
+import { OrderType } from "../utils/types";
 import { CartModelName } from "./cart";
+import { UserModelName } from "./user";
 
 const schema = new Schema<OrderType>({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: UserModelName,
+    required: true,
+  },
   cart: {
     type: Schema.Types.ObjectId,
     ref: CartModelName,
@@ -20,7 +26,7 @@ const schema = new Schema<OrderType>({
 
 export const OrderModelName = "Order";
 
-const OrderModel = model<CartType>(OrderModelName, schema);
+const OrderModel = model<OrderType>(OrderModelName, schema);
 
 OrderModel.syncIndexes();
 
