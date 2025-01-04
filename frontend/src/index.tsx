@@ -12,7 +12,7 @@ import Register from "./pages/register";
 import Users from "./pages/users";
 import VendorProducts from "./pages/vendorProducts";
 import Cart from "./pages/cart";
-import Checkout from "./pages/checkout";
+import Order from "./pages/order";
 
 const root = createRoot(document.getElementById("root")!);
 
@@ -33,7 +33,7 @@ root.render(
       <Route path="/vendor/register" element={<Register role="vendor" />} />
       <Route path="/products" element={<AllProducts />} />
       <Route path="/cart" element={<Cart />} />
-      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/order" element={<Order />} />
     </Routes>
   </BrowserRouter>
 );

@@ -7,7 +7,7 @@ import {
 } from "../middlewares/validation";
 import { CartProductModel } from "../models/cart";
 import ProductModel from "../models/product";
-import { CartGetResponseDataSchema } from "../utils/serializers";
+import { GetCartResponseDataSchema } from "../utils/serializers";
 import { UserType } from "../utils/types";
 import {
   AddToCartRequestBodySchema,
@@ -63,7 +63,7 @@ CartRouter.get(
         user: req.user._id,
       }).populate("product");
 
-      res.data = CartGetResponseDataSchema.parse(cartProducts);
+      res.data = GetCartResponseDataSchema.parse(cartProducts);
 
       next();
     } catch (error) {
@@ -90,8 +90,6 @@ CartRouter.put(
         next();
         return;
       }
-
-      console.log(req.user._id, product._id);
 
       await CartProductModel.findOneAndUpdate(
         {

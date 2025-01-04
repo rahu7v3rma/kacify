@@ -11,3 +11,4 @@ export type ApiResponseType<DataType> = {
   data: DataType;
   message: string;
 };
+

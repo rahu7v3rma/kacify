@@ -9,10 +9,7 @@ import { CartProductType } from "../utils/types";
 const Cart = () => {
   const [cartProducts, setCartProducts] = useState<CartProductType[]>([]);
   const loadCart = () => {
-    fetchCartProducts().then((response) => {
-      console.log({ response });
-      setCartProducts(response);
-    });
+    fetchCartProducts().then(setCartProducts);
   };
   useEffect(() => {
     loadCart();

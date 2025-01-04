@@ -36,3 +36,11 @@ export const sendProductsEmail = async (
 ) => {
   await sendEmail(to, "Your products", products.map((p) => p.name).join(", "));
 };
+
+export const sendOrderEmail = async (to: string, orderInfo: string) => {
+  await sendEmail(
+    to,
+    "Kacify order confirmation",
+    `Your order has been confirmed: ${orderInfo}`
+  );
+};

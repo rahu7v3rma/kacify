@@ -10,7 +10,7 @@ const schema = new Schema<OrderType>({
     required: true,
   },
   cart: {
-    type: Schema.Types.ObjectId,
+    type: [Schema.Types.ObjectId],
     ref: CartModelName,
     required: true,
   },

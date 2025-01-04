@@ -57,10 +57,7 @@ const AddProduct = ({ onSuccess }: { onSuccess: () => void }) => {
             return;
           }
           addProduct(name, price, image, description).then((response) => {
-            if (!response.success) {
-              alert(response.message);
-            } else {
-              alert("Product added successfully");
+            if (response.success) {
               onSuccess();
             }
           });

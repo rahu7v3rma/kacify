@@ -1,8 +1,10 @@
 import axios from "axios";
-import { getAuthToken } from "./localStorage";
+import { z } from "zod";
+import { GetOrderResponseDataSchema } from "../../../api/src/utils/serializers";
 import { ProductType, UserType } from "../../../api/src/utils/types";
-import { ApiResponseType, CartProductType } from "./types";
 import { alertApiRespone } from "./alert";
+import { getAuthToken } from "./localStorage";
+import { ApiResponseType, CartProductType } from "./types";
 
 const request = async <DataType>(
   method: "GET" | "POST" | "PUT" | "DELETE",
@@ -18,7 +20,9 @@ const request = async <DataType>(
     },
     data,
   });
-  return response.data;
+  const responseData = response.data;
+  alert(responseData.message);
+  return responseData;
 };
 
 export const fetchVendorProducts = async () => {
@@ -118,9 +122,10 @@ export const addToCart = async (productId: string, quantity: number) => {
   });
 };
 
-export const fetchCartProducts = alertApiRespone(async () => {
-  return await request<CartProductType[]>("GET", `/cart/products`);
-});
+export const fetchCartProducts = async () => {
+  const response = await request<CartProductType[]>("GET", `/cart/products`);
+  return response.data;
+};
 
 export const addUser = async (
   email: string,
@@ -142,11 +147,12 @@ export const editCartProduct = async (productId: string, quantity: number) => {
   return await request("PUT", `/cart/${productId}/${quantity}`);
 };
 
-export const getCheckout = async () => {
-  return await request<{
-    cart: CartProductType[];
-    clientSecret: string;
-  }>("GET", `/user/checkout`);
+export const getOrder = async () => {
+  const response = await request<z.infer<typeof GetOrderResponseDataSchema>>(
+    "GET",
+    `/order`
+  );
+  return response.data;
 };
 
 export const logError = async (data: string) => {
@@ -155,12 +161,12 @@ export const logError = async (data: string) => {
   });
 };
 
-export const postCheckout = async (
+export const postOrder = async (
   paymentIntentId: string,
   address: string,
   email: string
 ) => {
-  return await request("POST", `/user/checkout`, {
+  return await request("POST", `/order`, {
     paymentIntentId,
     address,
     email,

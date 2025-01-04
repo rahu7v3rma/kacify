@@ -6,6 +6,10 @@ import { CartProductModel } from "../models/cart";
 import { ProductType } from "../utils/types";
 import Stripe from "stripe";
 import { GetOrderResponseDataSchema } from "../utils/serializers";
+import { errorCatcher } from "../middlewares/error";
+import OrderModel from "../models/order";
+import { z } from "zod";
+import { sendOrderEmail } from "../utils/nodemailer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const OrderRouter = Router();
@@ -14,38 +18,38 @@ OrderRouter.get(
   "/",
   authHandler,
   roleHandler(["user"]),
-  async (req, res, next) => {
-    try {
-      const cart = await CartProductModel.find({ user: req.user._id })
-        .populate("product")
-        .lean();
+  errorCatcher(async (req, res, next) => {
+    const cart = await CartProductModel.find({ user: req.user._id })
+      .populate("product")
+      .lean();
 
-      const totalAmount = cart.reduce((acc, cartProduct) => {
-        const product = cartProduct.product as ProductType;
-        return acc + product.price * cartProduct.quantity;
-      }, 0);
+    const totalAmount = cart.reduce((acc, cartProduct) => {
+      const product = cartProduct.product as ProductType;
+      return acc + product.price * cartProduct.quantity;
+    }, 0);
 
-      let clientSecret = "";
-      if (totalAmount) {
-        const paymentIntent = await stripe.paymentIntents.create({
-          amount: totalAmount * 100,
-          currency: process.env.STRIPE_CURRENCY!,
-        });
-        if (paymentIntent.client_secret) {
-          clientSecret = paymentIntent.client_secret;
-        }
+    let clientSecret = "";
+    if (totalAmount) {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: totalAmount * 100,
+        currency: process.env.STRIPE_CURRENCY!,
+      });
+      if (paymentIntent.client_secret) {
+        clientSecret = paymentIntent.client_secret;
       }
+    }
 
-      res.data = GetOrderResponseDataSchema.parse({
+    res.json({
+      success: true,
+      message: "Successfully fetched order",
+      data: GetOrderResponseDataSchema.parse({
         cart,
         clientSecret,
-      });
+      }),
+    });
 
-      next();
-    } catch (error) {
-      next(error);
-    }
-  }
+    return;
+  })
 );
 
 OrderRouter.post(
@@ -53,41 +57,43 @@ OrderRouter.post(
   authHandler,
   roleHandler(["user"]),
   requestBodyValidationHandler(CheckoutConfirmRequestBodySchema),
-  async (req, res, next) => {
-    try {
-      // const { paymentIntentId, address, email } = req.body as z.infer<
-      //   typeof CheckoutConfirmRequestBodySchema
-      // >;
+  errorCatcher(async (req, res, next) => {
+    const { paymentIntentId, address, email } = req.body as z.infer<
+      typeof CheckoutConfirmRequestBodySchema
+    >;
 
-      // const paymentIntent = await stripe.paymentIntents.retrieve(
-      //   paymentIntentId
-      // );
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-      // if (paymentIntent.status !== "succeeded") {
-      //   res.json({
-      //     success: false,
-      //     message: "Payment failed",
-      //   });
-      //   return;
-      // }
-
-      // req.user.orders.push({
-      //   products: req.user.cart,
-      //   address,
-      //   email,
-      // });
-      // req.user.cart = [];
-      // await req.user.save();
-
-      // res.json({
-      //   success: true,
-      // });
-
+    if (paymentIntent.status !== "succeeded") {
+      res.json({
+        success: false,
+        message: "Payment failed",
+        data: null,
+      });
       return;
-    } catch (error) {
-      next(error);
     }
-  }
+
+    const cart = await CartProductModel.find({ user: req.user._id });
+
+    await OrderModel.create({
+      user: req.user._id,
+      cart: [cart.map((c) => c._id)],
+      address,
+      email,
+    });
+
+    const orderInfo = JSON.stringify(cart) + address;
+
+    await sendOrderEmail(email, orderInfo);
+
+    res.json({
+      success: true,
+      message: "order placed",
+      data: null,
+    });
+
+    return;
+  })
 );
 
 export default OrderRouter;
