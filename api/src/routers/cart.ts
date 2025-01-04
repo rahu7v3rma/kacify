@@ -14,6 +14,7 @@ import {
   DeleteCartProductRequestParamSchema,
   UpdateCartRequestParamSchema,
 } from "../utils/zod";
+import { errorCatcher } from "../middlewares/error";
 
 const CartRouter = Router();
 
@@ -22,54 +23,46 @@ CartRouter.post(
   authHandler,
   roleHandler(["user"]),
   requestBodyValidationHandler(AddToCartRequestBodySchema),
-  async (req, res, next) => {
-    try {
-      const { productId, quantity } = req.body as z.infer<
-        typeof AddToCartRequestBodySchema
-      >;
-      const user = req.user as UserType;
+  errorCatcher(async (req, res, next) => {
+    const { productId, quantity } = req.body as z.infer<
+      typeof AddToCartRequestBodySchema
+    >;
+    const user = req.user as UserType;
 
-      const product = await ProductModel.findById(productId);
-      if (!product) {
-        res.json({
-          success: false,
-          message: "Product not found",
-        });
-        return;
-      }
-
-      await CartProductModel.create({
-        user: user._id,
-        product: product._id,
-        quantity,
+    const product = await ProductModel.findById(productId);
+    if (!product) {
+      res.json({
+        success: false,
+        message: "Product not found",
       });
-
-      next();
-    } catch (error) {
-      next(error);
+      return;
     }
-  }
+
+    await CartProductModel.create({
+      user: user._id,
+      product: product._id,
+      quantity,
+    });
+
+    next();
+  })
 );
 
 CartRouter.get(
   "/products",
   authHandler,
   roleHandler(["user"]),
-  async (req, res, next) => {
-    try {
-      res.defaultData = [];
+  errorCatcher(async (req, res, next) => {
+    res.defaultData = [];
 
-      const cartProducts = await CartProductModel.find({
-        user: req.user._id,
-      }).populate("product");
+    const cartProducts = await CartProductModel.find({
+      user: req.user._id,
+    }).populate("product");
 
-      res.data = GetCartResponseDataSchema.parse(cartProducts);
+    res.data = GetCartResponseDataSchema.parse(cartProducts);
 
-      next();
-    } catch (error) {
-      next(error);
-    }
-  }
+    next();
+  })
 );
 
 CartRouter.put(
@@ -77,35 +70,31 @@ CartRouter.put(
   authHandler,
   roleHandler(["user"]),
   requestParamsValidationHandler(UpdateCartRequestParamSchema),
-  async (req, res, next) => {
-    try {
-      const { productId, quantity } = req.params as unknown as z.infer<
-        typeof UpdateCartRequestParamSchema
-      >;
+  errorCatcher(async (req, res, next) => {
+    const { productId, quantity } = req.params as unknown as z.infer<
+      typeof UpdateCartRequestParamSchema
+    >;
 
-      const product = await ProductModel.findById(productId);
-      if (!product) {
-        res.success = false;
-        res.message = "Product not found";
-        next();
-        return;
-      }
-
-      await CartProductModel.findOneAndUpdate(
-        {
-          user: req.user._id,
-          product: product._id,
-        },
-        {
-          quantity,
-        }
-      );
-
+    const product = await ProductModel.findById(productId);
+    if (!product) {
+      res.success = false;
+      res.message = "Product not found";
       next();
-    } catch (error) {
-      next(error);
+      return;
     }
-  }
+
+    await CartProductModel.findOneAndUpdate(
+      {
+        user: req.user._id,
+        product: product._id,
+      },
+      {
+        quantity,
+      }
+    );
+
+    next();
+  })
 );
 
 CartRouter.delete(
@@ -113,36 +102,32 @@ CartRouter.delete(
   authHandler,
   roleHandler(["user"]),
   requestParamsValidationHandler(DeleteCartProductRequestParamSchema),
-  async (req, res, next) => {
-    try {
-      const { productId } = req.params as unknown as z.infer<
-        typeof DeleteCartProductRequestParamSchema
-      >;
+  errorCatcher(async (req, res, next) => {
+    const { productId } = req.params as unknown as z.infer<
+      typeof DeleteCartProductRequestParamSchema
+    >;
 
-      const product = await ProductModel.findById(productId);
-      if (!product) {
-        res.success = false;
-        res.message = "Product not found";
-        next();
-        return;
-      }
-
-      const cartProduct = await CartProductModel.findOne({
-        user: req.user._id,
-        product: product._id,
-      });
-
-      if (!cartProduct) {
-        res.success = false;
-      } else {
-        await cartProduct.deleteOne();
-      }
-
+    const product = await ProductModel.findById(productId);
+    if (!product) {
+      res.success = false;
+      res.message = "Product not found";
       next();
-    } catch (error) {
-      next(error);
+      return;
     }
-  }
+
+    const cartProduct = await CartProductModel.findOne({
+      user: req.user._id,
+      product: product._id,
+    });
+
+    if (!cartProduct) {
+      res.success = false;
+    } else {
+      await cartProduct.deleteOne();
+    }
+
+    next();
+  })
 );
 
 export default CartRouter;

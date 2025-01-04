@@ -1,13 +1,11 @@
 import { Router } from "express";
 import { z } from "zod";
 import { authHandler, roleHandler } from "../middlewares/auth";
-import { handleError } from "../utils/logger";
-import {
-  LogErrorRequestBodySchema,
-  PermissionAddRequestBodySchema,
-} from "../utils/zod";
-import PermissionModel from "../models/permission";
 import { errorCatcher } from "../middlewares/error";
+import PermissionModel from "../models/permission";
+import {
+  PermissionAddRequestBodySchema
+} from "../utils/zod";
 
 const PermissionRouter = Router();
 
