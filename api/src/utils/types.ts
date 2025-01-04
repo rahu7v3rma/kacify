@@ -15,7 +15,7 @@ export interface UserType extends Document {
   password: string;
   forgotPasswordToken: number | null;
   role: "user" | "admin" | "vendor";
-  permissions: string[];
+  permissions: Types.ObjectId | PermissionType[] | string;
   cart: Types.ObjectId | CartType[] | string;
   orders: Types.ObjectId | OrderType[] | string;
 }
@@ -37,3 +37,10 @@ export interface OrderType extends Document {
   address: string;
   email: string;
 }
+
+export interface PermissionType extends Document {
+  name: string;
+  description: string;
+}
+
+export type RoleType = "user" | "admin" | "vendor";

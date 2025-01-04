@@ -110,3 +110,13 @@ export const UpdateCartRequestParamSchema = z.object({
 export const DeleteCartProductRequestParamSchema = z.object({
   productId: z.string().min(1),
 });
+
+export const PermissionAddRequestBodySchema = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1),
+});
+
+export const PermissionGetResponseDataSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+});

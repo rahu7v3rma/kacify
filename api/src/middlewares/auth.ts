@@ -3,6 +3,8 @@ import { JwtPayload } from "jsonwebtoken";
 import User from "../models/user";
 import { decodeJwt } from "../utils/jwt";
 import { errorCatcher } from "./error";
+import { PermissionType, RoleType } from "../utils/types";
+import PermissionModel from "../models/permission";
 
 export const authHandler: RequestHandler = errorCatcher(
   async (req, res, next) => {
@@ -36,7 +38,7 @@ export const authHandler: RequestHandler = errorCatcher(
   }
 );
 
-export const roleHandler = (roles: string[]): RequestHandler =>
+export const roleHandler = (roles: RoleType[]): RequestHandler =>
   errorCatcher(async (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       res.send({
@@ -51,15 +53,31 @@ export const roleHandler = (roles: string[]): RequestHandler =>
 export const permissionHandler = (permissions: string[]): RequestHandler =>
   errorCatcher(async (req, res, next) => {
     if (
+      !permissions.every(async (p) => await PermissionModel.exists({ name: p }))
+    ) {
+      res.send({
+        success: false,
+        message: "internal server error",
+        data: null,
+      });
+      return;
+    }
+
+    const userPermissions = (await req.user.populate("permissions"))
+      .permissions;
+
+    if (
       !permissions.every((permission) =>
-        req.user.permissions.includes(permission)
+        (userPermissions as PermissionType[]).find((p) => p.name == permission)
       )
     ) {
       res.send({
         success: false,
         message: "unauthorized",
+        data: null,
       });
       return;
     }
+
     next();
   });
