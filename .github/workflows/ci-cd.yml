@@ -17,9 +17,9 @@ jobs:
           cd ~/kacify/api
           npm install
           npm run build
-          pm2 stop mernApi
+          pm2 stop mernApi || echo "mernApi not found, skipping."
           pm2 start npm --name "mernApi" -- start
           cd ~/kacify/frontend
           npm install
-          pm2 stop mernFrontend
+          pm2 stop mernFrontend || echo "mernFrontend not found, skipping."
           pm2 start npm --name "mernFrontend" -- start
