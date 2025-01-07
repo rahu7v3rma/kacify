@@ -14,9 +14,6 @@ const Cart = () => {
   useEffect(() => {
     loadCart();
   }, []);
-  useEffect(() => {
-    console.log({ cartProducts });
-  }, [cartProducts]);
   return (
     <div className="p-4">
       Cart

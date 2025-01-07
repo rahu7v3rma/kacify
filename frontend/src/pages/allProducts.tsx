@@ -34,13 +34,7 @@ const AllProducts = () => {
             <span
               className="border cursor-pointer bg-blue-300"
               onClick={() => {
-                addToCart(product._id, 1).then((response) => {
-                  if (response.success) {
-                    alert("Product added to cart");
-                  } else {
-                    alert(response.message);
-                  }
-                });
+                addToCart(product._id, 1);
               }}
             >
               add to cart

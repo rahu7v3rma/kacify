@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "start": "concurrently \"tsc -w\" \"nodemon build/app.js\""
+    "build": "tsc",
+    "dev": "concurrently \"tsc -w\" \"nodemon build/app.js\"",
+    "start": "node build/app.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

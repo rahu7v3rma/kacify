@@ -86,11 +86,23 @@ const Order = () => {
   }, []);
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
+  useEffect(() => {
+    const stripeBuyButtonNode = document.createElement("stripe-buy-button");
+    stripeBuyButtonNode.setAttribute(
+      "buy-button-id",
+      "buy_btn_1PnPncRs9UmlsGpeq91TaHK9"
+    );
+    stripeBuyButtonNode.setAttribute(
+      "publishable-key",
+      "pk_test_51PnPkGRs9UmlsGpef456k4Uow7yIk6dTtFfA4yzinm9S3Vk8ZK53TydbYh39qol7Yr7mmf7yjYDL1PRQtzhGvMMB00XtXiWYE2"
+    );
+    document.getElementById("mainForm")?.appendChild(stripeBuyButtonNode);
+  });
   return (
     <div className="p-4 flex flex-col gap-4">
       <h1>Checkout</h1>
       {order && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4" id="mainForm">
           <table className="w-max">
             <thead>
               <tr>

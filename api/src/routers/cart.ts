@@ -15,6 +15,8 @@ import {
   UpdateCartRequestParamSchema,
 } from "../utils/zod";
 import { errorCatcher } from "../middlewares/error";
+import OrderModel from "../models/order";
+import { UserModelName } from "../models/user";
 
 const CartRouter = Router();
 
@@ -44,7 +46,13 @@ CartRouter.post(
       quantity,
     });
 
-    next();
+    res.json({
+      success: true,
+      message: "added to cart",
+      data: null,
+    });
+
+    return;
   })
 );
 

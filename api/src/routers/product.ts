@@ -23,6 +23,7 @@ ProductRouter.get(
     const products = await ProductModel.find({}).select("-__v");
     res.json({
       success: true,
+      message: 'product fetched successfully',
       data: products,
     });
     return;

@@ -77,7 +77,7 @@ OrderRouter.post(
 
     await OrderModel.create({
       user: req.user._id,
-      cart: [cart.map((c) => c._id)],
+      cart,
       address,
       email,
     });
